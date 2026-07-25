@@ -50,4 +50,10 @@ model Job {
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
   completedAt DateTime?
+
+  @@index([status])
+  @@index([position])
+  @@index([createdById])
+  @@index([createdAt])
+  @@index([status, position]) // composite — matches your most common combined filter
 }

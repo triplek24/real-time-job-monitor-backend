@@ -70,40 +70,31 @@ export const getAllJobs = async (filters: {
   const skip = (page - 1) * limit;
 
   const where: any = {};
-
   if (search) {
     where.OR = [
       { title: { contains: search, mode: 'insensitive' } },
       { description: { contains: search, mode: 'insensitive' } },
     ];
   }
+  if (position) where.position = position;
+  if (experienceRange) where.experience = { contains: experienceRange };
+  if (status) where.status = status;
 
-  if (position) {
-    where.position = position;
-  }
+  const tA = performance.now();
+  await prisma.$connect(); // no-op if already connected, but timestamps it
+  const tB = performance.now();
 
-  if (experienceRange) {
-    where.experience = { contains: experienceRange };
-  }
+  const jobs = await prisma.job.findMany({
+    where, skip, take: limit,
+    orderBy: { createdAt: 'desc' },
+    include: { creator: { select: { id: true, email: true, role: true } } },
+  });
+  const tC = performance.now();
 
-  if (status) {
-    where.status = status;
-  }
+  const total = await prisma.job.count({ where });
+  const tD = performance.now();
 
-  const [jobs, total] = await Promise.all([
-    prisma.job.findMany({
-      where,
-      skip,
-      take: limit,
-      orderBy: { createdAt: 'desc' },
-      include: {
-        creator: {
-          select: { id: true, email: true, role: true },
-        },
-      },
-    }),
-    prisma.job.count({ where }),
-  ]);
+  console.log(`[TIMING] connect: ${(tB-tA).toFixed(1)}ms | findMany: ${(tC-tB).toFixed(1)}ms | count: ${(tD-tC).toFixed(1)}ms`);
 
   return { jobs, total, page, totalPages: Math.ceil(total / limit) };
 };

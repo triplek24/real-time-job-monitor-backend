@@ -47,7 +47,30 @@ export const createJobController = async (req: Request, res: Response) => {
 //   }
 // };
 
+// export const getJobsController = async (req: Request, res: Response) => {
+//   try {
+//     const filters = {
+//       page: parseInt(req.query.page as string) || 1,
+//       limit: parseInt(req.query.limit as string) || 50,
+//       search: req.query.search as string,
+//       position: req.query.position as string,
+//       experienceRange: req.query.experienceRange as string,
+//       status: req.query.status as string,
+//     };
+
+//     const result = await jobService.getAllJobs(filters);
+//     res.json({ success: true, data: result });
+//   } catch (error: any) {
+//     res.status(500).json({
+//       success: false,
+//       error: 'Server Error',
+//       message: error.message || 'Failed to fetch jobs',
+//     });
+//   }
+// };
+// jobsController.ts
 export const getJobsController = async (req: Request, res: Response) => {
+  const t0 = performance.now();
   try {
     const filters = {
       page: parseInt(req.query.page as string) || 1,
@@ -58,7 +81,12 @@ export const getJobsController = async (req: Request, res: Response) => {
       status: req.query.status as string,
     };
 
+    const t1 = performance.now();
     const result = await jobService.getAllJobs(filters);
+    const t2 = performance.now();
+
+    console.log(`[TIMING] parse: ${(t1 - t0).toFixed(1)}ms | query: ${(t2 - t1).toFixed(1)}ms | total: ${(t2 - t0).toFixed(1)}ms`);
+
     res.json({ success: true, data: result });
   } catch (error: any) {
     res.status(500).json({
