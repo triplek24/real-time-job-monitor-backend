@@ -15,15 +15,15 @@ const app = express();
 // CORS configuration
 const allowedOrigins = [
   'http://localhost:5173',
-  'https://real-time-job-monitor-seven.vercel.app/', // your actual Vercel production URL
-];
+  process.env.FRONTEND_URL, 
+].filter(Boolean) as string[];
 
 app.use(cors({
   origin: (origin, callback) => {
-    // allow requests with no origin (e.g. Postman, curl, server-to-server)
     if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
+      console.log('[CORS] Blocked origin:', origin, '| allowed:', allowedOrigins);
       callback(new Error('Not allowed by CORS'));
     }
   },
