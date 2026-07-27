@@ -13,12 +13,22 @@ dotenv.config();
 const app = express();
 
 // CORS configuration
-const corsOptions = {
-  origin: process.env.FRONTEND_URL || 'http://localhost:5173',
-  credentials: true,
-};
+const allowedOrigins = [
+  'http://localhost:5173',
+  'https://real-time-job-monitor-seven.vercel.app/', // your actual Vercel production URL
+];
 
-app.use(cors(corsOptions));
+app.use(cors({
+  origin: (origin, callback) => {
+    // allow requests with no origin (e.g. Postman, curl, server-to-server)
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true,
+}));
 app.use(helmet());
 app.use(express.json());
 
